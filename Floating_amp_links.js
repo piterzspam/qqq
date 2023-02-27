@@ -3,34 +3,133 @@
 // @namespace    Violentmonkey Scripts
 // @match        *://*/*
 // @grant        none
+// @setupURL     https://raw.githubusercontent.com/piterzspam/qqq/main/Floating_amp_links.js
+// @exclude      https://www.google.com/recaptcha/*
+// @exclude      https://*recaptcha.net/*
+//
 // ==/UserScript==
-(function() {
+(function()
+{
 	'use strict';
 
+	var currentUrl = location.href;
+	//2*link[href][rel="canonical"] https://endler.dev/2022/readable/
 	// Select all links with "canonical" or "amphtml" relation attributes
-	const links = document.querySelectorAll('link[href][rel="canonical"], link[href][rel="amphtml"]');
+	var canonicalLink = document.querySelector('link[href][rel="canonical"]');
+	var amphtmlLink = document.querySelector('link[href][rel="amphtml"]');
 
 	// Filter out links with the same href as the current page
-	const list2 = Array.from(links)
-		.filter(link => link.href !== location.href)
+	var listUrlAndName = Array();
+	/*.from(links)
+		.filter(link => link.href !== currentUrl)
 		.map(link => ({
 			href: link.href,
-			rel: link.rel
-		}));
+			name: link.rel
+		}));*/
 
-	if (list2.length > 0) {
-    var elementsHtmlAmps = document.querySelectorAll('HTML[amp], HTML[\⚡]');
-    var hostname = new URL(location.href).hostname;
-    var isAmpSubdomain = hostname.endsWith('.cdn.ampproject.org');
-    if (elementsHtmlAmps.length > 0 && !isAmpSubdomain)
-    {
-      list2.push({
-		  	href: getAmpGoogleUrl(location.href),
-		  	rel: "amphtml-Google"
-		  })
-    }
+	if (canonicalLink)
+	{
+		listUrlAndName.push(
+		{
+			href: canonicalLink.href,
+			name: canonicalLink.rel,
+		});
+	}
+	if (amphtmlLink)
+	{
+		listUrlAndName.push(
+		{
+			href: amphtmlLink.href,
+			name: amphtmlLink.rel,
+		});
+		listUrlAndName.push(
+		{
+			href: getAmpGoogleUrl(amphtmlLink.href),
+			name: "ampproject"
+		});
+	}
+	else
+	{
+		var isAmpPage = (null !== document.querySelector('HTML[amp], HTML[\⚡]'));
+		if (isAmpPage)
+		{
+			//https://www-gazetaprawna-pl.cdn.ampproject.org/v/s/www.gazetaprawna.pl/magazyn-na-weekend/artykuly/8667412,wojna-wybuch-doswiadczenie-ukraina-ukraincy.html.amp?amp_js_v=0.1
+			var isAmpSubdomain = (new URL(currentUrl).hostname).endsWith('.cdn.ampproject.org');
+			if (isAmpSubdomain)
+			{
+				listUrlAndName.push(
+				{
+					href: currentUrl,
+					name: "ampproject"
+				});
+				var currentAmpprojectUrl = new URL(currentUrl);
+				currentAmpprojectUrl.searchParams.delete('amp_js_v');
+				var ampUrl = currentAmpprojectUrl.protocol + "//" + currentAmpprojectUrl.pathname.replace(/^\/v\/s\//, "");
+				listUrlAndName.push(
+				{
+					href: ampUrl,
+					name: "amphtml"
+				});
+			}
+			else
+			{
+				listUrlAndName.push(
+				{
+					href: currentUrl,
+					name: "amphtml"
+				});
+
+				listUrlAndName.push(
+				{
+					href: getAmpGoogleUrl(currentUrl),
+					name: "ampproject"
+				});
+			}
+		}
+		else
+		{
+			var isOnetSubdomain = (new URL(currentUrl).hostname).endsWith('.onet.pl');
+			if (canonicalLink && isOnetSubdomain)
+			{
+				var isCurrentSubdomainWwwOnetPl = (new URL(currentUrl).hostname).endsWith('www.onet.pl');
+				if (!isCurrentSubdomainWwwOnetPl)
+				{
+					var ampUrl = canonicalLink.href + ".amp";
+					listUrlAndName.push(
+					{
+						href: ampUrl,
+						name: "amphtml",
+					});
+					listUrlAndName.push(
+					{
+						href: getAmpGoogleUrl(ampUrl),
+						name: "ampproject",
+					});
+				}
+			}
+		}
+	}
+
+	if (listUrlAndName.length > 0)
+	{
+		listUrlAndName.push(
+		{
+			href: "https://archive.ph/" + currentUrl,
+			name: "archive.ph"
+		});
+		listUrlAndName.push(
+		{
+			href: "https://readable.shuttleapp.rs/" + currentUrl,
+			name: "readable"
+		});
+		listUrlAndName.push(
+		{
+			href: "https://12ft.io/" + currentUrl,
+			name: "12ft.io"
+		});
+		var listUrlAndNameUnique = listUrlAndName.filter(link => link.href !== currentUrl);
 		// Create the buttonsHolder element
-		const buttonsHolder = document.createElement('div');
+		var buttonsHolder = document.createElement('div');
 		buttonsHolder.id = 'buttonsHolder';
 		buttonsHolder.style.position = "fixed";
 		buttonsHolder.style.bottom = "0";
@@ -46,7 +145,7 @@
 		document.body.appendChild(buttonsHolder);
 
 		// Add a button to remove buttonsHolder
-		const closeButton = document.createElement('button');
+		var closeButton = document.createElement('button');
 		closeButton.innerHTML = "X";
 		closeButton.style.float = "right";
 		//closeButton.style.backgroundColor = "transparent";
@@ -54,33 +153,33 @@
 		closeButton.style.fontSize = "24px";
 		closeButton.style.cursor = "pointer";
 		closeButton.style.filter = "none !important";
-    //filter: blur(0px);
+		//filter: blur(0px);
 		closeButton.addEventListener('click', () => buttonsHolder.remove());
 		buttonsHolder.appendChild(closeButton);
 
+		var detailsElem = document.createElement('details');
+		var summaryElem = document.createElement('summary');
+		summaryElem.textContent = "Linki";
+		detailsElem.appendChild(summaryElem);
+
+
 		// Create the list of links in buttonsHolder
-		const linksList = document.createElement('ul');
+		var linksList = document.createElement('ul');
+		detailsElem.appendChild(linksList);
+		buttonsHolder.appendChild(detailsElem);
 		//linksList.style.listStyle = 'none';
 		//linksList.style.margin = '0';
 		//linksList.style.padding = '0';
-		buttonsHolder.appendChild(linksList);
 
 
-		const ampButton = list2.find(x => x.rel === 'amphtml');
-		if (ampButton) {
-			//ampButton.href = getAmpGoogleUrl(ampButton.href);
-			//ampButton.rel = "AMP-Googlexxxxxxxxxxxxxxxxx";
-			list2.push({
-			  href: getAmpGoogleUrl(ampButton.href),
-			  rel: "amphtml-Google"
-		});
-		}
+
 		// Add links to linksList
-		list2.forEach(linkObj => {
-			const linkItem = document.createElement('li');
-			const link = document.createElement('a');
+		listUrlAndNameUnique.forEach(linkObj =>
+		{
+			var linkItem = document.createElement('li');
+			var link = document.createElement('a');
 			link.href = linkObj.href;
-			link.innerText = linkObj.rel;
+			link.innerText = linkObj.name;
 			//link.target = '_blank';
 			link.style.display = "block";
 			link.style.filter = "none !important";
@@ -95,20 +194,20 @@
 
 	}
 
-	function getAmpGoogleUrl(url) {
-		const regex = /(?<protocol>https?:\/\/)(?<domain>[^\/]+)\/(?<rest_of_url>.+)/;
-		const {
+	function getAmpGoogleUrl(url)
+	{
+		var regex = /(?<protocol>https?:\/\/)(?<domain>[^\/]+)\/(?<rest_of_url>.+)/;
+		var
+		{
 			protocol,
 			domain,
 			rest_of_url
 		} = url.match(regex).groups;
-		const ampGoogleUrl = `${protocol}${domain.replace(/\./g, '-')}.cdn.ampproject.org/v/s/${domain}/${rest_of_url}`;
-      const separator = ampGoogleUrl.includes('?') ? '&' : '?';
+		var ampGoogleUrl = new URL(`${protocol}${domain.replace(/\./g, '-')}.cdn.ampproject.org/v/s/${domain}/${rest_of_url}`);
 
-    const encodedKey = encodeURIComponent("amp_js_v");
-    const encodedValue = encodeURIComponent("0.1");
+		ampGoogleUrl.searchParams.append("amp_js_v", "0.1");
 
-    const newUrl = `${ampGoogleUrl}${separator}${encodedKey}=${encodedValue}`;
-		return newUrl;
+
+		return ampGoogleUrl;
 	}
 })();
