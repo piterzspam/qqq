@@ -157,10 +157,13 @@
 		closeButton.addEventListener('click', () => buttonsHolder.remove());
 		buttonsHolder.appendChild(closeButton);
 
+
 		var detailsElem = document.createElement('details');
 		var summaryElem = document.createElement('summary');
 		summaryElem.textContent = "Linki";
 		detailsElem.appendChild(summaryElem);
+    detailsElem.style.clear = "right";
+
 
 
 		// Create the list of links in buttonsHolder
