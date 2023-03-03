@@ -3,7 +3,8 @@
 // @namespace    Violentmonkey Scripts
 // @match        *://*/*
 // @grant        none
-// @setupURL     https://raw.githubusercontent.com/piterzspam/qqq/main/Floating_amp_links.js
+// @updateURL    https://raw.githubusercontent.com/piterzspam/qqq/main/Floating_amp_links.js
+// @version			 1.0.0.1
 // @exclude      https://www.google.com/recaptcha/*
 // @exclude      https://*recaptcha.net/*
 //
