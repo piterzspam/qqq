@@ -138,6 +138,7 @@
 		buttonsHolder.style.height = "auto";
 		buttonsHolder.style.backgroundColor = "#fff";
 		buttonsHolder.style.padding = "10px";
+		buttonsHolder.style.fontSize = "24px";
 
 		buttonsHolder.style.borderTop = "10px solid black";
 		buttonsHolder.style.borderRight = "10px solid black";
@@ -150,9 +151,9 @@
 		closeButton.style.float = "right";
 		//closeButton.style.backgroundColor = "transparent";
 		//closeButton.style.border = "none";
-		closeButton.style.fontSize = "24px";
 		closeButton.style.cursor = "pointer";
 		closeButton.style.filter = "none !important";
+		closeButton.style.marginBottom = "24px";
 		//filter: blur(0px);
 		closeButton.addEventListener('click', () => buttonsHolder.remove());
 		buttonsHolder.appendChild(closeButton);
