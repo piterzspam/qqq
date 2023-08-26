@@ -1,12 +1,12 @@
 // ==UserScript==
-// @name         Pływające linki do AMP
-// @namespace    Violentmonkey Scripts
-// @match        *://*/*
-// @grant        none
-// @updateURL    https://raw.githubusercontent.com/piterzspam/qqq/main/Floating_amp_links.js
-// @version			 1.0.0.1
-// @exclude      https://www.google.com/recaptcha/*
-// @exclude      https://*recaptcha.net/*
+// @name	Pływające linki do AMP
+// @namespace	Violentmonkey Scripts
+// @match	*://*/*
+// @grant	none
+// @updateURL	https://raw.githubusercontent.com/piterzspam/qqq/main/Floating_amp_links.js
+// @version	1.0.0.1
+// @exclude	https://www.google.com/recaptcha/*
+// @exclude	https://*recaptcha.net/*
 //
 // ==/UserScript==
 (function()
@@ -85,28 +85,6 @@
 					href: getAmpGoogleUrl(currentUrl),
 					name: "ampproject"
 				});
-			}
-		}
-		else
-		{
-			var isOnetSubdomain = (new URL(currentUrl).hostname).endsWith('.onet.pl');
-			if (canonicalLink && isOnetSubdomain)
-			{
-				var isCurrentSubdomainWwwOnetPl = (new URL(currentUrl).hostname).endsWith('www.onet.pl');
-				if (!isCurrentSubdomainWwwOnetPl)
-				{
-					var ampUrl = canonicalLink.href + ".amp";
-					listUrlAndName.push(
-					{
-						href: ampUrl,
-						name: "amphtml",
-					});
-					listUrlAndName.push(
-					{
-						href: getAmpGoogleUrl(ampUrl),
-						name: "ampproject",
-					});
-				}
 			}
 		}
 	}
